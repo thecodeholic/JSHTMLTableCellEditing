@@ -11,27 +11,43 @@ export default class TableCellEditor {
       td.addEventListener('mousedown', (ev) => {
         const td = ev.currentTarget;
         if (!td.classList.contains('input-editing')) {
-          const currentValue = td.innerHTML;
-          td.setAttribute('data-value', currentValue);
-          td.className = 'input-editing';
-          const toolbar = this.createButtons();
-          const btnCancel = toolbar.querySelector('.btn-cancel');
-          const btnSave = toolbar.querySelector('.btn-save');
-
-          btnCancel.addEventListener('click', (ev) => this.onCancel(ev, td));
-          btnSave.addEventListener('click', (ev) => this.onSave(ev, td));
-
-          td.appendChild(toolbar);
+          this.startEditing(td);
         }
       });
 
-      td.addEventListener('focusout', (ev) => {
-        const td = ev.currentTarget;
-        td.className = '';
-      })
+      td.addEventListener('focusout', (ev) => this.finishEditing(td));
     }
   }
 
+  startEditing(td) {
+    const currentValue = td.innerHTML;
+    td.setAttribute('data-value', currentValue);
+    td.className = 'input-editing';
+    const toolbar = this.createButtons();
+    const btnCancel = toolbar.querySelector('.btn-cancel');
+    const btnSave = toolbar.querySelector('.btn-save');
+
+    btnCancel.addEventListener('click', (ev) => this.cancelEditing(td));
+    btnSave.addEventListener('click', (ev) => this.finishEditing(td));
+
+    td.appendChild(toolbar);
+  }
+
+  cancelEditing(td){
+    td.innerHTML = td.getAttribute('data-value');
+    td.classList.remove('input-editing');
+    this.removeToolbar(td);
+  }
+
+  finishEditing(td){
+    td.classList.remove('input-editing');
+    this.removeToolbar(td);
+  }
+
+  removeToolbar(td){
+    const toolbar = td.querySelector('.button-toolbar');
+    toolbar.remove();
+  }
 
   createButtons() {
     const div = document.createElement('div');
@@ -44,14 +60,5 @@ export default class TableCellEditor {
     </div>
   `;
     return div;
-  }
-
-  onCancel(ev, td) {
-    td.innerHTML = td.getAttribute('data-value');
-    td.classList.remove('input-editing');
-  }
-
-  onSave(ev, td) {
-    td.classList.remove('input-editing');
   }
 }

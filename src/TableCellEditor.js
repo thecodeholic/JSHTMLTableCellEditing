@@ -24,6 +24,11 @@ export default class TableCellEditor {
           td.appendChild(toolbar);
         }
       });
+
+      td.addEventListener('focusout', (ev) => {
+        const td = ev.currentTarget;
+        td.className = '';
+      })
     }
   }
 

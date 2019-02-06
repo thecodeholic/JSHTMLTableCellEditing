@@ -10,7 +10,7 @@ export default class TableCellEditor {
       td.setAttribute('contenteditable', true);
       td.addEventListener('mousedown', (ev) => {
         const td = ev.currentTarget;
-        if (!td.classList.contains('input-editing')) {
+        if (!this.isEditing(td)) {
           this.startEditing(td);
         }
       });
@@ -27,24 +27,39 @@ export default class TableCellEditor {
     const btnCancel = toolbar.querySelector('.btn-cancel');
     const btnSave = toolbar.querySelector('.btn-save');
 
-    btnCancel.addEventListener('click', (ev) => this.cancelEditing(td));
-    btnSave.addEventListener('click', (ev) => this.finishEditing(td));
+    btnCancel.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.cancelEditing(td);
+    });
+    btnSave.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.finishEditing(td);
+    });
 
     td.appendChild(toolbar);
   }
 
-  cancelEditing(td){
-    td.innerHTML = td.getAttribute('data-value');
-    td.classList.remove('input-editing');
-    this.removeToolbar(td);
+  isEditing(td) {
+    return td.classList.contains('input-editing');
   }
 
-  finishEditing(td){
-    td.classList.remove('input-editing');
-    this.removeToolbar(td);
+  cancelEditing(td) {
+    debugger;
+    if (this.isEditing(td)) {
+      td.innerHTML = td.getAttribute('data-value');
+      td.classList.remove('input-editing');
+      this.removeToolbar(td);
+    }
   }
 
-  removeToolbar(td){
+  finishEditing(td) {
+    if (this.isEditing(td)) {
+      td.classList.remove('input-editing');
+      this.removeToolbar(td);
+    }
+  }
+
+  removeToolbar(td) {
     const toolbar = td.querySelector('.button-toolbar');
     toolbar.remove();
   }

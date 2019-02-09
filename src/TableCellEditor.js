@@ -1,79 +1,80 @@
-export default class TableCellEditor {
+export default class TableCellEditing {
   constructor(table) {
     this.tbody = table.querySelector('tbody');
-
   }
 
   init() {
-    const allTds = this.tbody.querySelectorAll('td');
-    for (let td of allTds) {
+    this.tds = this.tbody.querySelectorAll('td');
+    this.tds.forEach(td => {
       td.setAttribute('contenteditable', true);
-      td.addEventListener('mousedown', (ev) => {
-        const td = ev.currentTarget;
-        if (!this.isEditing(td)) {
+      td.addEventListener('click', (ev) => {
+
+        const activeTd = this.findActiveCell();
+        if (activeTd) {
+          this.cancelEditing(activeTd);
+        }
+        if (!this.inEditing(td)) {
           this.startEditing(td);
         }
       });
-
-      td.addEventListener('focusout', (ev) => this.finishEditing(td));
-    }
+    });
   }
 
   startEditing(td) {
-    const currentValue = td.innerHTML;
-    td.setAttribute('data-value', currentValue);
-    td.className = 'input-editing';
-    const toolbar = this.createButtons();
-    const btnCancel = toolbar.querySelector('.btn-cancel');
-    const btnSave = toolbar.querySelector('.btn-save');
+    td.classList.add('in-editing');
+    td.setAttribute('data-old-value', td.innerHTML);
 
-    btnCancel.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      this.cancelEditing(td);
-    });
-    btnSave.addEventListener('click', (ev) => {
-      ev.stopPropagation();
-      this.finishEditing(td);
-    });
-
-    td.appendChild(toolbar);
-  }
-
-  isEditing(td) {
-    return td.classList.contains('input-editing');
+    this.createToolbar(td);
   }
 
   cancelEditing(td) {
-    debugger;
-    if (this.isEditing(td)) {
-      td.innerHTML = td.getAttribute('data-value');
-      td.classList.remove('input-editing');
-      this.removeToolbar(td);
-    }
+    this.removeToolbar(td);
+
+    td.innerHTML = td.getAttribute('data-old-value');
+  }
+
+  inEditing(td) {
+    return td.classList.contains('in-editing')
   }
 
   finishEditing(td) {
-    if (this.isEditing(td)) {
-      td.classList.remove('input-editing');
-      this.removeToolbar(td);
-    }
+    this.removeToolbar(td);
   }
 
-  removeToolbar(td) {
-    const toolbar = td.querySelector('.button-toolbar');
-    toolbar.remove();
+  findActiveCell() { 
+    return Array.prototype.find.call(this.tds, td => this.inEditing(td));
   }
 
-  createButtons() {
+  createToolbar(td) {
     const div = document.createElement('div');
     div.className = 'button-toolbar';
     div.setAttribute('contenteditable', false);
     div.innerHTML = `
     <div class="button-wrapper">
       <button class="btn btn-danger btn-sm btn-cancel">Cancel</button>
-      <button class="btn btn-success btn-sm btn-save">Save</button>
+      <button class="btn btn-primary btn-sm btn-save">Save</button>
     </div>
-  `;
+    `;
+    td.appendChild(div);
+
+    const saveBtn = td.querySelector('.btn-save');
+    const cancelBtn = td.querySelector('.btn-cancel');
+    saveBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.finishEditing(td);
+    });
+    cancelBtn.addEventListener('click', (ev) => {
+      ev.stopPropagation();
+      this.cancelEditing(td);
+    });
+
+
     return div;
+  }
+
+  removeToolbar(td) {
+    td.classList.remove('in-editing');
+    const toolbar = td.querySelector('.button-toolbar');
+    toolbar.remove();
   }
 }

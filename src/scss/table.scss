@@ -2,8 +2,12 @@ table{
   >tbody{
     >tr{
       >td{
-        outline: 0;
         position: relative;
+
+        .td-content{
+          outline: 0;
+        }
+
         .button-toolbar{
           display: none;
           border-top: none;

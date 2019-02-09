@@ -6,11 +6,16 @@ export default class TableCellEditing {
   init() {
     this.tds = this.tbody.querySelectorAll('td');
     this.tds.forEach(td => {
-      td.setAttribute('contenteditable', true);
+      const innerDiv = document.createElement('div');
+      innerDiv.className = 'td-content';
+      innerDiv.setAttribute('contenteditable', true);
+      innerDiv.innerHTML = td.innerHTML;
+      td.innerHTML = '';
+      td.appendChild(innerDiv);
       td.addEventListener('click', (ev) => {
 
         const activeTd = this.findActiveCell();
-        if (activeTd) {
+        if (activeTd && td !== activeTd) {
           this.cancelEditing(activeTd);
         }
         if (!this.inEditing(td)) {
@@ -20,9 +25,19 @@ export default class TableCellEditing {
     });
   }
 
+  getValue(td){
+    const innerDiv = td.querySelector('.td-content');
+    return innerDiv.innerHTML;
+  }
+
+  setValue(td, value){
+    const innerDiv = td.querySelector('.td-content');
+    innerDiv.innerHTML = value;
+  }
+
   startEditing(td) {
     td.classList.add('in-editing');
-    td.setAttribute('data-old-value', td.innerHTML);
+    td.setAttribute('data-old-value', this.getValue(td));
 
     this.createToolbar(td);
   }
@@ -30,7 +45,7 @@ export default class TableCellEditing {
   cancelEditing(td) {
     this.removeToolbar(td);
 
-    td.innerHTML = td.getAttribute('data-old-value');
+    this.setValue(td, td.getAttribute('data-old-value'));
   }
 
   inEditing(td) {
@@ -41,14 +56,13 @@ export default class TableCellEditing {
     this.removeToolbar(td);
   }
 
-  findActiveCell() { 
+  findActiveCell() {
     return Array.prototype.find.call(this.tds, td => this.inEditing(td));
   }
 
   createToolbar(td) {
     const div = document.createElement('div');
     div.className = 'button-toolbar';
-    div.setAttribute('contenteditable', false);
     div.innerHTML = `
     <div class="button-wrapper">
       <button class="btn btn-danger btn-sm btn-cancel">Cancel</button>

@@ -24,7 +24,7 @@ function drawUsersTable(users) {
   });
 }
 
-function initTableCellEditing(){
+function initTableCellEditing() {
   const editor = new TableCellEditor(document.querySelector('table'));
   editor.init();
 }
